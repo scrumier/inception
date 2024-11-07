@@ -1,11 +1,10 @@
 all:
-	@docker compose -f srcs/docker-compose.yml up -d --build
+	@docker compose --env-file srcs/.env -f srcs/docker-compose.yml up -d --build
 
 down:
 	@docker compose -f srcs/docker-compose.yml down
 
-re:
-	@docker compose -f srcs/docker-compose.yml up -d --build
+re: down all
 
 clean:
 	@docker stop $$(docker ps -qa);\
