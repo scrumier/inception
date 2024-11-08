@@ -10,20 +10,53 @@ services:
       - ./web:/var/www/html
     networks:
       - inception
+    restart: always
   wordpress:
-    build: requirements/wordpress/.
+    depends_on:
+      - mariadb
+    build:
+      context: requirements/wordpress/.
+      dockerfile: Dockerfile
+      args:
+        - DB_NAME
+        - DB_USER
+        - DB_PASSWORD
+        - DB_ROOT_PASSWORD
+        - WP_URL
+    env_file:
+      - .env
     container_name: wp-php
     volumes:
       - ./web:/var/www/html
+    ports:
+      - "9000:9000"
     networks:
       - inception
+    restart: always
   mariadb:
-    build: requirements/mariadb/.
+    user: "999:999"
+    build:
+      context: requirements/mariadb/.
+      dockerfile: Dockerfile
+      args:
+        - DB_NAME
+        - DB_USER
+        - DB_PASSWORD
+        - DB_HOST
+        - WP_URL
+        - WP_ADMIN
+        - WP_ADMIN_PASSWORD
+        - WP_ADMIN_EMAIL
+    env_file:
+      - .env
     container_name: mariadb
+    ports:
+      - "3306:3306"
     volumes:
       - ./database:/var/lib/mysql
     networks:
       - inception
+    restart: always
 
 networks:
   inception:

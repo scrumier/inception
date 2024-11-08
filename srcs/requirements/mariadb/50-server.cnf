@@ -14,11 +14,13 @@ init_file = /etc/mysql/init.sql
 # * Basic Settings
 #
 
-user                    = root
-pid-file                = /run/mysqld/mysqld.pid
-basedir                 = /usr
 datadir                 = /var/lib/mysql
+socket                  = /run/mysqld/mysqld.sock
+pid-file                = /run/mysqld/mysqld.pid
+port                    = 3306
+user                    = mysql
 tmpdir                  = /tmp
+basedir                 = /usr
 
 # Broken reverse DNS slows down connections considerably and name resolve is
 # safe to skip if there are no "host by domain name" access grants
