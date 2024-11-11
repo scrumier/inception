@@ -4,8 +4,10 @@ services:
   nginx:
     build: requirements/nginx/.
     container_name: nginx
+    depends_on:
+      - wordpress
     ports:
-      - "80:80"
+      - "443:443"
     volumes:
       - ./web:/var/www/html
     networks:
@@ -28,13 +30,10 @@ services:
     container_name: wp-php
     volumes:
       - ./web:/var/www/html
-    ports:
-      - "9000:9000"
     networks:
       - inception
     restart: always
   mariadb:
-    user: "999:999"
     build:
       context: requirements/mariadb/.
       dockerfile: Dockerfile
@@ -50,8 +49,6 @@ services:
     env_file:
       - .env
     container_name: mariadb
-    ports:
-      - "3306:3306"
     volumes:
       - ./database:/var/lib/mysql
     networks:

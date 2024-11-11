@@ -9,20 +9,26 @@ ARG WP_URL
 RUN apt-get update -y && apt-get upgrade -y && apt-get install -y \
     mariadb-client \
     mariadb-server \
-    && apt-get clean
+    vim \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy configuration files and script
-COPY 50-server.cnf /etc/mysql/mariadb.conf.d/.
-COPY init.sql /etc/mysql/.
-COPY script.sh .
+RUN mkdir -p /var/run/mysqld \
+&& chown -R mysql:mysql /var/run/mysqld \
+&& chmod 777 /var/run/mysqld
 
-# Create required directories and set proper ownership
-RUN mkdir -p /run/mysqld /var/lib/mysql \
-    && chown -R mysql:mysql /run/mysqld \
-    && chmod +x script.sh
-
-# Expose the MySQL port
 EXPOSE 3306
 
-# Run the script
-CMD ["./script.sh"]
+#COPY		./conf/mysqld.conf ~/my.cnf
+#COPY		./conf/mysqld.conf /etc/mysql/my.cnf
+COPY		./conf/mysqld.conf /etc/my.cnf
+
+
+COPY ./tools/mariadb.sh /usr/local/bin/
+COPY ./conf/wordpress.sql /usr/local/bin/
+RUN chmod +x /usr/local/bin/mariadb.sh
+RUN chmod +x /usr/local/bin/wordpress.sql
+
+ENTRYPOINT [ "/usr/local/bin/mariadb.sh" ]
+
+CMD ["mysqld", "--bind-address=0.0.0.0"]
