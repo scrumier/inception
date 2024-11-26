@@ -1,32 +1,25 @@
 FROM debian:oldstable
 
-# Update and install necessary packages
-RUN apt-get update -y && apt-get upgrade -y
+RUN apt-get update
+RUN apt-get upgrade -y
 
-RUN apt-get -y install wget
+RUN apt-get install -y --no-install-recommends \
+        wordpress \
+        php-cli \
+        php-mysql \
+        php-fpm \
+        curl\
+        msmtp
 
-RUN apt-get install -y php7.4 \
-    php-fpm \
-    php-mysql \
-    mariadb-client
+RUN mkdir /run/php/
+RUN chown -R www-data:www-data /run/php/
 
-RUN wget https://fr.wordpress.org/wordpress-6.0-fr_FR.tar.gz -P /var/www
+COPY conf/config-wp.sh /usr/local/bin/
+COPY conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
 
-RUN cd /var/www && tar -xzf wordpress-6.0-fr_FR.tar.gz && rm wordpress-6.0-fr_FR.tar.gz
+RUN chmod +x /usr/local/bin/config-wp.sh
 
-RUN wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+EXPOSE 9000
 
-RUN chmod +x wp-cli.phar
-RUN mv wp-cli.phar /usr/local/bin/wp
-
-RUN mkdir -p /run/php
-RUN chown -R www-data:www-data /run/php
-
-RUN chown -R www-data:www-data /var/www
-RUN chmod -R 755 /var/www
-
-COPY ./tools/www.conf /etc/php/7.4/fpm/pool.d/www.conf
-
-RUN chown www-data:www-data /etc/php/7.4/fpm/pool.d/www.conf
-
-CMD ["/usr/sbin/php-fpm7.4", "-F"]
+ENTRYPOINT [ "/usr/local/bin/config-wp.sh" ]
+CMD [ "php-fpm7.4", "-F" ]
